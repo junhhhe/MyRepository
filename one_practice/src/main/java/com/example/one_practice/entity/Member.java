@@ -1,17 +1,15 @@
 package com.example.one_practice.entity;
 
+import com.example.one_practice.jwt.MemberRole;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "member")
+@Table(name = "members")
 public class Member {
 
     @Id
@@ -24,5 +22,29 @@ public class Member {
     @Column(nullable = false)
     private String username;
 
-    private String role;
+    @Column(nullable = false)
+    private String nickname;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Enumerated(EnumType.STRING)
+    private MemberRole role;
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Builder
+    public Member(Long id, String email, String password, String nickname, MemberRole role) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.role = role;
+    }
 }

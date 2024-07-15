@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,8 +19,8 @@ import java.util.Iterator;
 @AllArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter{
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
+    private  final AuthenticationManager authenticationManager;
+    private final JWTUtil jwtUtil;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -40,19 +41,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter{
     //로그인 성공시 실행하는 메소드 (여기서 JWT를 발급하면 됨)
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
-        //UserDetailsS
+        //username 추출
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-
         String username = customUserDetails.getUsername();
+        String name = customUserDetails.getName();
 
+        //role 추출
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
-
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt(username, role, 60*60*10L);
+        // JWTUtil에 token 생성 요청
+        String token = jwtUtil.createJwt(username, role);
 
+        // JWT를 response에 담아서 응답 (header 부분에)
+        // key : "Authorization"
+        // value : "Bearer " (인증방식) + token
         response.addHeader("Authorization", "Bearer " + token);
     }
 
@@ -64,4 +69,3 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter{
         response.setStatus(401);
     }
 }
-
